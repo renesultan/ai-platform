@@ -1,4 +1,7 @@
 from urllib import request, error
+from dotenv import load_dotenv
+import openai
+import os
 
 class ModelResponse:
     """
@@ -20,30 +23,44 @@ class ModelInterface:
     """
     Simple interface for AI model interactions.
     """
-    def __init__(self, api_key):
-        self.api_key = api_key
+    def __init__(self, api_key=None):
+        """
+        Initialize the model interface with API keys.
+        If no key is provided, attempts to load from environment.
+        """
+        load_dotenv()
+        self.api_key = api_key or os.getenv('OPENAI_API_KEY')
+
+        if not self.api_key:
+            raise ValueError("API key must be provided or set in OPENAI_API_KEY environment variable")
+        
+        # Assign api_key to openai.api_key
+        openai.api_key = self.api_key
 
     def generate(self, query):
         """
         Generate a response for the given query.
-        Currently making a test HTTP GET request to httpbin.
+        Currently using OpenAI's ChatCompletion API.
         """
         try:
-            # Make a simple GET request to httpbin
-            url = "https://httpbin.org/get"
+            # Call openai's ChatCompletion endpoint
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=[{"role": "user", "content": query}]
+            )
 
-            # Create a Request object
-            req = request.Request(url)
+            # Validate the response structure
+            if "choices" not in response or not response["choices"]:
+                # Return an error ModelResponse if no choices are provided
+                return ModelResponse(
+                    text="",
+                    error="Empty or malformed response from OpenAI"
+                )
 
-            # Open the URL and get the response
-            with request.urlopen(req) as response:
-                # Read the response and decode from bytes to string
-                data = response.read().decode('utf-8')
-                return ModelResponse(f"Got response: {data}")
-            
-        except error.URLError as e:
-            # Handle network-related errors
-            return ModelResponse(text="", error=f"Network error: {str(e)}")
+            # Extract the text from the response
+            response_text = response['choices'][0]['message']['content']
+            return ModelResponse(text=response_text)
+
         except Exception as e:
-            # Handle any other errors
-            return ModelResponse(text="", error=f"Unexpected error: {str(e)}")
+            # Handle errors and return an error response
+            return ModelResponse(text="", error=f"API error: {str(e)}")
