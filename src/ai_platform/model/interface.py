@@ -1,23 +1,12 @@
-from urllib import request, error
+"""
+Interface for AI model interactions.
+"""
+
 from dotenv import load_dotenv
 import openai
 import os
 
-class ModelResponse:
-    """
-    A simple class to hold model responses.
-    """
-    def __init__(self, text, error=None):
-        self.text = text
-        self.error = error
-
-    def __str__(self):
-        """
-        Makes it easy to print responses
-        """
-        if self.error:
-            return f"Error: {self.error}"
-        return f"Response: {self.text}"
+from ..common.types import ModelResponse
     
 class ModelInterface:
     """
