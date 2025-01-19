@@ -1,4 +1,6 @@
-"""Model interface module for the AI platform."""
+"""
+Model interface module for the AI platform.
+"""
 
 from .interface import ModelInterface
 
