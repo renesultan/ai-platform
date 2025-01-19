@@ -11,12 +11,26 @@ ai_platform/
 ├── src/
 │   └── ai_platform/
 │       ├── __init__.py
-│       └── model.py  # ModelInterface with OpenAI integration
+│       ├── common/           # Shared components
+│       │   ├── __init__.py
+│       │   └── types.py     # Shared data types (ModelResponse)
+│       ├── model/           # Model interface components
+│       │   ├── __init__.py
+│       │   └── interface.py # ModelInterface implementation
+│       └── retrieval/       # Future RAG implementation
+│           └── __init__.py
 ├── tests/
 │   ├── __init__.py
-│   └── test_model.py  # Unit tests for ModelInterface and ModelResponse
-├── CONTRIBUTING.md    # Development guidelines and practices
-├── requirements.txt   # Pinned dependencies
+│   ├── common/
+│   │   ├── __init__.py
+│   │   └── test_types.py   # Tests for shared types
+│   ├── model/
+│   │   ├── __init__.py
+│   │   └── test_interface.py # Tests for model interface
+│   └── retrieval/           # Future RAG tests
+│       └── __init__.py
+├── CONTRIBUTING.md         # Development guidelines
+├── requirements.txt       # Pinned dependencies
 └── README.md
 ```
 
@@ -29,32 +43,95 @@ ai_platform/
   * Feature branches: Component-specific development
 * See [CONTRIBUTING.md](CONTRIBUTING.md) for development workflow and guidelines
 
-### Implemented ComponentsDependencies
+### Implemented Components
 
 1. **Basic AI API Integration**
-
-   - **ModelResponse class**: Holds text and/or error messages, with a custom `__str__` for easy debugging.
-   - **ModelInterface class**: Uses the OpenAI `ChatCompletion.create` method, with environment-based or direct API key management.
-   - **Robust Error Handling**:
-     - Raises a `ValueError` if no API key is found.
-     - Validates API responses (checks for an empty or missing `choices` field).
-     - Catches and reports API errors.
-   - **Unit Tests**:
-     - Mocks OpenAI calls to avoid real API usage during testing.
-     - Covers missing API keys, malformed responses, and general error cases.
-2. **HTTP Request System (Legacy / Minimal)**
-
-   - Initially set up for testing with `httpbin.org`.
-   - Retained for reference but superseded by direct OpenAI integration in `ModelInterface`.
+   - **Common Types**:
+     - `ModelResponse` class for consistent response handling
+     - Supports both successful and error responses
+     - Custom string representation for easy debugging
+   - **Model Interface**:
+     - `ModelInterface` class for OpenAI API integration
+     - Environment-based or direct API key management
+     - Comprehensive error handling
+   - **Testing Infrastructure**:
+     - Modular test organization matching source structure
+     - Mocked OpenAI calls for reliable testing
+     - Support for both unittest and pytest frameworks
 
 ### Dependencies
 
-Your dependencies are pinned in `requirements.txt` for reproducibility, including:
+Dependencies are pinned in `requirements.txt` for reproducibility:
 
-- `openai` (for AI API calls)
-- `python-dotenv` (for managing `.env` environment variables)
-- `pytest`, `pytest-asyncio`, and/or `unittest` (for testing)
-- `httpx` or `urllib` (for any remaining HTTP requests, if needed)
+- `openai`: AI API integration
+- `python-dotenv`: Environment variable management
+- `pytest`: Primary testing framework
+- `pytest-asyncio`: Async test support
+- `httpx`: HTTP client for API calls
+
+## Testing
+
+The project supports multiple testing approaches:
+
+### Running All Tests
+
+```bash
+# Using pytest (recommended)
+pytest
+
+# Using unittest
+python -m unittest
+python -m unittest discover
+```
+
+### Running Specific Tests
+
+```bash
+# Run tests in a specific file
+pytest tests/common/test_types.py
+pytest tests/model/test_interface.py
+
+# Run tests using unittest
+python -m unittest tests/common/test_types.py
+python -m unittest tests/model/test_interface.py
+
+# Run specific test class
+python -m unittest tests.common.test_types.TestModelResponse
+python -m unittest tests.model.test_interface.TestModelInterface
+
+# Run specific test method
+pytest tests/common/test_types.py::TestModelResponse::test_successful_response
+python -m unittest tests.common.test_types.TestModelResponse.test_successful_response
+```
+
+## Getting Started
+
+1. Clone the repository:
+
+```bash
+git clone https://github.com/yourusername/ai-platform.git
+cd ai-platform
+```
+
+2. Create and activate virtual environment:
+
+```bash
+python -m venv venv
+source venv/bin/activate  # Unix
+venv\Scripts\activate     # Windows
+```
+
+3. Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+4. Run tests to verify setup:
+
+```bash
+pytest
+```
 
 ## Roadmap
 
@@ -84,84 +161,25 @@ Your dependencies are pinned in `requirements.txt` for reproducibility, includin
    - Write operation support
    - Transaction management
 
-### Current Implementation Details
-
-#### ModelResponse Class
-
-- Manages both successful outputs and error states
-- Simple data structure with text and error fields
-- Custom `__str__` method for clear debugging output
-
-#### ModelInterface Class
-
-- Integrates with OpenAI’s `ChatCompletion` endpoint
-- Loads `OPENAI_API_KEY` from environment or constructor parameter
-- Validates response structure (catches missing/empty `choices`)
-- Handles errors robustly, returning a `ModelResponse` with error details
-
-#### Testing
-
-- **Comprehensive Unit Tests**:
-
-  - **ModelResponse**: Ensures text/error fields and `__str__` behavior are correct
-  - **ModelInterface**: Mocks OpenAI calls and tests success/error scenarios, including missing API keys and malformed responses
-- Run with:
-
-  ```bash
-  python -m unittest discover tests
-  ```
-
-  or your preferred testing framework (eg., `pytest`).
-
-## Getting Started
-
-1. Clone the repository:
-
-```bash
-git clone https://github.com/renesultan/ai-platform.git
-cd ai-platform
-```
-
-2. Create and activate virtual environment:
-
-```bash
-python -m venv venv
-source venv/bin/activate  # Unix
-venv\Scripts\activate     # Windows
-```
-
-3. Install dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-
-4. Run tests:
-
-```bash
-python -m unittest tests/test_model.py
-```
-
--or-
-
-```python
-pytest
-```
-
 ## Next Implementation Task
 
 While the initial OpenAI integration is functional, there are still improvements to be made:
 
-1. **Explore Additional Error Handling**
-   * Catch specific OpenAI exceptions like `RateLimitError` or `AuthenticationError`
-   * Provide user-friendly or automated-retry logic
-2. **Experiment with Model Parameters**
-   * Adjust temperature, max_tokens, etc.
-   * Explore different models (e.g., GPT-4)
-3. **Continue Progression**
-   * Extend the platform with Retrieval Augmented Generation (RAG)
-   * Implement guardrails for safer inputs/outputs
-   * Build a model router/gateway for multiple AI providers
+1. **Document Storage and Indexing**
+
+   - Implement document store
+   - Add vector embeddings support
+   - Create index management
+2. **Context Integration**
+
+   - Implement retrieval system
+   - Integrate retrieved context with queries
+   - Add context management
+3. **Testing Strategy**
+
+   - Unit tests for document store
+   - Integration tests for retrieval
+   - End-to-end RAG tests
 
 ## Development
 
