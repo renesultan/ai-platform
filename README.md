@@ -17,8 +17,10 @@ ai_platform/
 │       ├── model/           # Model interface components
 │       │   ├── __init__.py
 │       │   └── interface.py # ModelInterface implementation
-│       └── retrieval/       # Future RAG implementation
-│           └── __init__.py
+│       └── retrieval/       # RAG system implementation
+│           ├── __init__.py
+│           ├── types.py     # Document and DocumentChunk classes
+│           └── document_store.py  # DocumentStore implementation
 ├── tests/
 │   ├── __init__.py
 │   ├── common/
@@ -27,8 +29,10 @@ ai_platform/
 │   ├── model/
 │   │   ├── __init__.py
 │   │   └── test_interface.py # Tests for model interface
-│   └── retrieval/           # Future RAG tests
-│       └── __init__.py
+│   └── retrieval/           # RAG system tests
+│       ├── __init__.py
+│       ├── test_types.py    # Tests for Document/DocumentChunk
+│       └── test_document_store.py # Tests for DocumentStore
 ├── CONTRIBUTING.md         # Development guidelines
 ├── requirements.txt       # Pinned dependencies
 └── README.md
@@ -46,18 +50,26 @@ ai_platform/
 ### Implemented Components
 
 1. **Basic AI API Integration**
+
    - **Common Types**:
      - `ModelResponse` class for consistent response handling
      - Supports both successful and error responses
-     - Custom string representation for easy debugging
+     - Custom string representation for debugging
    - **Model Interface**:
      - `ModelInterface` class for OpenAI API integration
      - Environment-based or direct API key management
      - Comprehensive error handling
-   - **Testing Infrastructure**:
-     - Modular test organization matching source structure
-     - Mocked OpenAI calls for reliable testing
-     - Support for both unittest and pytest frameworks
+2. **RAG System Foundation**
+
+   - **Document Types**:
+     - `Document` class for storing complete documents
+     - `DocumentChunk` class for managing document segments
+     - Support for metadata and unique identifiers
+   - **Document Store**:
+     - In-memory storage for documents and chunks
+     - Configurable chunking strategy
+     - Efficient document and chunk retrieval
+     - Support for custom chunk sizes
 
 ### Dependencies
 
@@ -71,8 +83,6 @@ Dependencies are pinned in `requirements.txt` for reproducibility:
 
 ## Testing
 
-The project supports multiple testing approaches:
-
 ### Running All Tests
 
 ```bash
@@ -80,28 +90,20 @@ The project supports multiple testing approaches:
 pytest
 
 # Using unittest
-python -m unittest
 python -m unittest discover
 ```
 
 ### Running Specific Tests
 
 ```bash
-# Run tests in a specific file
-pytest tests/common/test_types.py
-pytest tests/model/test_interface.py
+# Run tests for specific components
+pytest tests/common/
+pytest tests/model/
+pytest tests/retrieval/
 
-# Run tests using unittest
-python -m unittest tests/common/test_types.py
-python -m unittest tests/model/test_interface.py
-
-# Run specific test class
-python -m unittest tests.common.test_types.TestModelResponse
-python -m unittest tests.model.test_interface.TestModelInterface
-
-# Run specific test method
-pytest tests/common/test_types.py::TestModelResponse::test_successful_response
-python -m unittest tests.common.test_types.TestModelResponse.test_successful_response
+# Run specific test files
+pytest tests/retrieval/test_types.py
+pytest tests/retrieval/test_document_store.py
 ```
 
 ## Getting Started
@@ -135,52 +137,57 @@ pytest
 
 ## Roadmap
 
-1. Context Enhancement with RAG
+1. ✅ Basic OpenAI Integration
 
-   - Implement retrieval system
-   - Document storage and indexing
-   - Context integration with queries
-2. Input/Output Guardrails
+   - Model interface
+   - Response handling
+   - Error management
+2. ✅ RAG System Foundation
 
-   - Input validation and sanitization
+   - Document representation
+   - Basic chunking strategy
+   - Document store implementation
+3. RAG System Enhancement
+
+   - Vector embeddings support
+   - Similarity search
+   - Context integration
+4. Input/Output Guardrails
+
+   - Input validation
    - Output verification
-   - Safety checks and filters
-3. Model Router and Gateway
+   - Safety checks
+5. Model Router and Gateway
 
    - Multiple model support
-   - Request routing logic
-   - API gateway implementation
-4. Caching Mechanisms
+   - Request routing
+   - API gateway
+6. Caching Mechanisms
 
    - Response caching
    - Cache invalidation
    - Performance optimization
-5. Complex Logic and Write Actions
-
-   - Multi-step operations
-   - Write operation support
-   - Transaction management
 
 ## Next Implementation Task
 
-While the initial OpenAI integration is functional, there are still improvements to be made:
+Current focus is on enhancing the RAG system with:
 
-1. **Document Storage and Indexing**
+1. Vector Embeddings
 
-   - Implement document store
-   - Add vector embeddings support
-   - Create index management
-2. **Context Integration**
+   - Implementation of embedding generation
+   - Storage of embeddings
+   - Efficient vector similarity search
+2. Context Integration
 
-   - Implement retrieval system
-   - Integrate retrieved context with queries
-   - Add context management
-3. **Testing Strategy**
+   - Relevance-based document retrieval
+   - Context window management
+   - Query enhancement with context
+3. Testing Strategy
 
-   - Unit tests for document store
+   - Unit tests for embedding functionality
    - Integration tests for retrieval
    - End-to-end RAG tests
 
 ## Development
 
-For guidelines on branch strategy, commit messages, and workflow, see [**CONTRIBUTING**.md](CONTRIBUTING.md).
+For guidelines on branch strategy, commit messages, and workflow, see [CONTRIBUTING.md](CONTRIBUTING.md).
