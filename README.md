@@ -20,7 +20,13 @@ ai_platform/
 │       └── retrieval/       # RAG system implementation
 │           ├── __init__.py
 │           ├── types.py     # Document and DocumentChunk classes
-│           └── document_store.py  # DocumentStore implementation
+│           ├── document_store.py  # DocumentStore implementation
+│           └── embeddings/   # Embedding functionality
+│               ├── __init__.py
+│               ├── interfaces.py  # Abstract embedding interfaces
+│               └── models/        # Model implementations
+│                   ├── __init__.py
+│                   └── openai.py  # OpenAI embedding model
 ├── tests/
 │   ├── __init__.py
 │   ├── common/
@@ -32,7 +38,13 @@ ai_platform/
 │   └── retrieval/           # RAG system tests
 │       ├── __init__.py
 │       ├── test_types.py    # Tests for Document/DocumentChunk
-│       └── test_document_store.py # Tests for DocumentStore
+│       ├── test_document_store.py # Tests for DocumentStore
+│       └── embeddings/
+│           ├── __init__.py
+│           ├── test_interfaces.py # Tests for embedding interfaces
+│           └── models/
+│               ├── __init__.py
+│               └── test_openai.py # Tests for OpenAI implementation
 ├── CONTRIBUTING.md         # Development guidelines
 ├── requirements.txt       # Pinned dependencies
 └── README.md
@@ -70,6 +82,11 @@ ai_platform/
      - Configurable chunking strategy
      - Efficient document and chunk retrieval
      - Support for custom chunk sizes
+   - **Embedding System**:
+     - Abstract `EmbeddingModel` interface
+     - Factory pattern for model creation
+     - OpenAI embedding model implementation
+     - Comprehensive testing suite
 
 ### Dependencies
 
@@ -104,6 +121,8 @@ pytest tests/retrieval/
 # Run specific test files
 pytest tests/retrieval/test_types.py
 pytest tests/retrieval/test_document_store.py
+pytest tests/retrieval/embeddings/test_interfaces.py
+pytest tests/retrieval/embeddings/models/test_openai.py
 ```
 
 ## Getting Started
@@ -147,11 +166,13 @@ pytest
    - Document representation
    - Basic chunking strategy
    - Document store implementation
-3. RAG System Enhancement
+3. 🔄 RAG System Enhancement
 
-   - Vector embeddings support
-   - Similarity search
-   - Context integration
+   - ✅ Initial embedding interfaces
+   - ✅ OpenAI embedding implementation
+   - ⏳ Vector storage support
+   - ⏳ Similarity search
+   - ⏳ Context integration
 4. Input/Output Guardrails
 
    - Input validation
@@ -170,13 +191,13 @@ pytest
 
 ## Next Implementation Task
 
-Current focus is on enhancing the RAG system with:
+Current focus is on completing the RAG system enhancement with:
 
-1. Vector Embeddings
+1. Vector Storage
 
-   - Implementation of embedding generation
-   - Storage of embeddings
-   - Efficient vector similarity search
+   - Implement EmbeddingStore class
+   - FAISS integration for similarity search
+   - Integration with DocumentStore
 2. Context Integration
 
    - Relevance-based document retrieval
@@ -184,8 +205,8 @@ Current focus is on enhancing the RAG system with:
    - Query enhancement with context
 3. Testing Strategy
 
-   - Unit tests for embedding functionality
-   - Integration tests for retrieval
+   - Unit tests for vector storage
+   - Integration tests for similarity search
    - End-to-end RAG tests
 
 ## Development
