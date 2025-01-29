@@ -21,12 +21,18 @@ ai_platform/
 │           ├── __init__.py
 │           ├── types.py     # Document and DocumentChunk classes
 │           ├── document_store.py  # DocumentStore implementation
-│           └── embeddings/   # Embedding functionality
+│           ├── embeddings/   # Embedding functionality
+│           │   ├── __init__.py
+│           │   ├── interfaces.py  # Abstract embedding interfaces
+│           │   └── models/        # Model implementations
+│           │       ├── __init__.py
+│           │       └── openai.py  # OpenAI embedding model
+│           └── vector_store/  # Vector storage functionality
 │               ├── __init__.py
-│               ├── interfaces.py  # Abstract embedding interfaces
-│               └── models/        # Model implementations
+│               ├── interfaces.py  # VectorStore interface
+│               └── implementations/ # Concrete implementations
 │                   ├── __init__.py
-│                   └── openai.py  # OpenAI embedding model
+│                   └── faiss_store.py  # FAISS-based store
 ├── tests/
 │   ├── __init__.py
 │   ├── common/
@@ -39,12 +45,18 @@ ai_platform/
 │       ├── __init__.py
 │       ├── test_types.py    # Tests for Document/DocumentChunk
 │       ├── test_document_store.py # Tests for DocumentStore
-│       └── embeddings/
+│       ├── embeddings/
+│       │   ├── __init__.py
+│       │   ├── test_interfaces.py # Tests for embedding interfaces
+│       │   └── models/
+│       │       ├── __init__.py
+│       │       └── test_openai.py # Tests for OpenAI implementation
+│       └── vector_store/
 │           ├── __init__.py
-│           ├── test_interfaces.py # Tests for embedding interfaces
-│           └── models/
+│           ├── test_interfaces.py # Tests for VectorStore interface
+│           └── implementations/
 │               ├── __init__.py
-│               └── test_openai.py # Tests for OpenAI implementation
+│               └── test_faiss_store.py # Tests for FAISS store
 ├── CONTRIBUTING.md         # Development guidelines
 ├── requirements.txt       # Pinned dependencies
 └── README.md
@@ -87,6 +99,11 @@ ai_platform/
      - Factory pattern for model creation
      - OpenAI embedding model implementation
      - Comprehensive testing suite
+   - **Vector Store**:
+     - Abstract `VectorStore` interface
+     - FAISS-based implementation for efficient similarity search
+     - Support for dynamic updates and deletions
+     - Comprehensive testing suite
 
 ### Dependencies
 
@@ -97,6 +114,7 @@ Dependencies are pinned in `requirements.txt` for reproducibility:
 - `pytest`: Primary testing framework
 - `pytest-asyncio`: Async test support
 - `httpx`: HTTP client for API calls
+- `faiss-cpu`: Vector similarity search
 
 ## Testing
 
@@ -123,6 +141,7 @@ pytest tests/retrieval/test_types.py
 pytest tests/retrieval/test_document_store.py
 pytest tests/retrieval/embeddings/test_interfaces.py
 pytest tests/retrieval/embeddings/models/test_openai.py
+pytest tests/retrieval/vector_store/implementations/test_faiss_store.py
 ```
 
 ## Getting Started
@@ -170,8 +189,8 @@ pytest
 
    - ✅ Initial embedding interfaces
    - ✅ OpenAI embedding implementation
-   - ⏳ Vector storage support
-   - ⏳ Similarity search
+   - ✅ Vector storage interface
+   - ✅ FAISS vector store implementation
    - ⏳ Context integration
 4. Input/Output Guardrails
 
@@ -193,21 +212,17 @@ pytest
 
 Current focus is on completing the RAG system enhancement with:
 
-1. Vector Storage
+1. Context Integration
 
-   - Implement EmbeddingStore class
-   - FAISS integration for similarity search
-   - Integration with DocumentStore
-2. Context Integration
-
+   - Integration of DocumentStore with VectorStore
    - Relevance-based document retrieval
    - Context window management
    - Query enhancement with context
-3. Testing Strategy
+2. Testing Strategy
 
-   - Unit tests for vector storage
-   - Integration tests for similarity search
+   - Integration tests for RAG system
    - End-to-end RAG tests
+   - Performance benchmarks
 
 ## Development
 
