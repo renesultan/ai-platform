@@ -1,41 +1,10 @@
+"""
+Tests for model interface
+"""
+
 import unittest
 from unittest.mock import patch
-from src.ai_platform.model import ModelInterface, ModelResponse
-
-class TestModelResponse(unittest.TestCase):
-    """
-    Test cases for the ModelResponse class
-    """
-
-    def test_successful_response(self):
-        """
-        Test creating a successful response
-        """
-        response = ModelResponse("Hello")
-        self.assertEqual(response.text, "Hello")
-        self.assertIsNone(response.error)
-
-    def test_error_response(self):
-        """
-        Test creating an error response
-        """
-        response = ModelResponse("", error="Something went wrong")
-        self.assertEqual(response.text, "")
-        self.assertEqual(response.error, "Something went wrong")
-
-    def test_str_successful_response(self):
-        """
-        Test the string representation of a successful response
-        """
-        response = ModelResponse("Hello from GPT")
-        self.assertEqual(str(response), "Response: Hello from GPT")
-
-    def test_str_error_response(self):
-        """
-        Test the string representation of an error response
-        """
-        response = ModelResponse("", error="Something went really wrong")
-        self.assertEqual(str(response), "Error: Something went really wrong")
+from src.ai_platform.model import ModelInterface
 
 class TestModelInterface(unittest.TestCase):
     """
@@ -45,7 +14,7 @@ class TestModelInterface(unittest.TestCase):
     so we never hit the real OpenAI API in these tests.
     """
 
-    @patch("src.ai_platform.model.openai.ChatCompletion.create")
+    @patch("src.ai_platform.model.interface.openai.ChatCompletion.create")
     def test_basic_request(self, mock_create):
         """
         Test a basic request to the ChatCompletion endpoint, but mocked.
@@ -74,7 +43,7 @@ class TestModelInterface(unittest.TestCase):
         self.assertIn("messages", kwargs)
         self.assertIn("model", kwargs)
 
-    @patch("src.ai_platform.model.openai.ChatCompletion.create")
+    @patch("src.ai_platform.model.interface.openai.ChatCompletion.create")
     def test_error_handling(self, mock_create):
         """
         If the OpenAI call fails, ensure we properly catch the error
@@ -97,7 +66,7 @@ class TestModelInterface(unittest.TestCase):
         # Confirm ChatCompletion.create was called once
         mock_create.assert_called_once()
 
-    @patch("src.ai_platform.model.load_dotenv", return_value=None)
+    @patch("src.ai_platform.model.interface.load_dotenv", return_value=None)
     @patch.dict("os.environ", {}, clear=True)
     def test_missing_api_key_raises_value_error(self, mock_load_dotenv):
         """
@@ -107,7 +76,7 @@ class TestModelInterface(unittest.TestCase):
         with self.assertRaises(ValueError):
             ModelInterface(api_key=None)
 
-    @patch("src.ai_platform.model.openai.ChatCompletion.create")
+    @patch("src.ai_platform.model.interface.openai.ChatCompletion.create")
     def test_empty_choices_handling(self, mock_create):
         """
         If OpenAI returns an empty or missing choices array,
