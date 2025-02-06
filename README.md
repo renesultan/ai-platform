@@ -4,7 +4,7 @@ A progressive implementation of an AI platform based on Chip Huyen's architectur
 
 ## Current State
 
-### Project Structure
+### Current Project Structure
 
 ```
 ai_platform/
@@ -259,20 +259,126 @@ for chunk, score in results:
    - Cache invalidation
    - Performance optimization
 
-## Next Implementation Task
+## Next Implementation: Guardrails and Pipeline System
 
-Current focus is on implementing input/output guardrails:
+### Design Decisions
 
-1. Input Validation
+We're implementing a pipeline-based architecture for processing requests, with guardrails as a major system component:
 
+1. **Pipeline Framework**
+
+   - `PipelineContext`: Holds request state through processing
+   - `PipelineStep`: Abstract interface for pipeline stages
+   - `Pipeline`: Orchestrates step execution
+   - Clean error propagation and state management
+2. **Guardrails as Independent Component**
+
+   - Separate major component like model and retrieval
+   - Clear interfaces for input validation
+   - Flexible policy management
+   - Reusable across different pipeline configurations
+3. **Component Integration**
+
+   - All major components (model, retrieval, guardrails) at same level
+   - Pipeline orchestrates component interaction
+   - Maintains clean separation of concerns
+
+#### Target Project Structure (after Guardrails and Pipeline Implementation):
+
+```
+ai_platform/
+├── src/
+│   └── ai_platform/
+│       ├── __init__.py
+│       ├── common/          # Shared components 
+│       ├── model/          # Model interface
+│       ├── retrieval/      # RAG system
+│       ├── guardrails/     # Guardrail components
+│       │   ├── __init__.py
+│       │   ├── interfaces.py # Guardrail abstractions
+│       │   ├── types.py    # Guardrail results
+│       │   ├── input/      # Input guardrails
+│       │   │   ├── __init__.py
+│       │   │   ├── validation.py
+│       │   │   ├── pii.py
+│       │   │   ├── safety.py
+│       │   │   └── rate.py
+│       │   └── policy/     # Guardrail policies
+│       │       ├── __init__.py
+│       │       └── handlers.py
+│       └── pipeline/       # Pipeline orchestration
+|          ├── __init__.py
+|          ├── interfaces.py # Pipeline abstractions
+|          ├── types.py     # Pipeline context
+|          ├── steps.py     # Step implementations
+|          └── factory.py   # Pipeline construction
+├── tests/
+│   └── ...                # Test structure mirrors src
+
+```
+
+### Implementation Roadmap
+
+Phase 1: Core Pipeline Infrastructure
+
+1. Basic Pipeline Framework
+
+   - Implement `PipelineContext` class
+   - Create `PipelineStep` interface
+   - Build `Pipeline` orchestrator
+   - Add comprehensive tests
+2. Initial Component Integration
+
+   - Define pipeline step interfaces
+   - Create step implementations for existing components
+   - Test step implementations
+   - Create pipeline factory
+3. Pipeline Integration Testing
+
+   - Test full query flow
+   - Verify error propagation
+   - Integration tests
+
+Phase 2: Guardrails Foundation
+
+1. Base Infrastructure
+
+   - Create guardrail interfaces
+   - Define result types
+   - Implement policy framework
+   - Test mechanics
+2. Basic Input Guardrails
+
+   - Input validation implementation
    - Content filtering
-   - Safety checks
-   - Rate limiting
-2. Output Verification
+   - Length checks
+   - Individual tests
+3. Pipeline Integration
 
-   - Response validation
-   - Quality checks
-   - Safety filtering
+   - Create guardrail pipeline steps
+   - Test integrated flow
+   - Full integration tests
+
+Phase 3: Advanced Guardrails
+
+1. PII Detection
+
+   - Detection patterns
+   - Redaction capability
+   - Policy handlers
+   - Testing
+2. Rate Limiting
+
+   - Rate limiting interface
+   - Basic implementation
+   - Policy management
+   - Testing
+3. Content Safety
+
+   - Safety checking
+   - Policy implementation
+   - Handler testing
+   - Integration testing
 
 ## Development
 
