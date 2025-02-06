@@ -6,6 +6,8 @@ from .types import Document, DocumentChunk
 from .document_store import DocumentStore
 from .embeddings import EmbeddingModel, EmbeddingModelFactory
 from .vector_store import VectorStore
+from .chunk_embedder import ChunkEmbedder
+from .rag_store import RAGStore, RAGStoreError
 
 __all__ = [
     'Document',
@@ -13,5 +15,8 @@ __all__ = [
     'DocumentStore',
     'EmbeddingModel',
     'EmbeddingModelFactory',
-    'VectorStore'
+    'VectorStore',
+    'ChunkEmbedder',
+    'RAGStore',
+    'RAGStoreError'
 ]
