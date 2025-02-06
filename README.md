@@ -11,12 +11,56 @@ ai_platform/
 ├── src/
 │   └── ai_platform/
 │       ├── __init__.py
-│       └── model.py  # ModelInterface with OpenAI integration
+│       ├── common/           # Shared components
+│       │   ├── __init__.py
+│       │   └── types.py     # Shared data types (ModelResponse)
+│       ├── model/           # Model interface components
+│       │   ├── __init__.py
+│       │   └── interface.py # ModelInterface implementation
+│       └── retrieval/       # RAG system implementation
+│           ├── __init__.py
+│           ├── types.py     # Document and DocumentChunk classes
+│           ├── document_store.py  # DocumentStore implementation
+│           ├── chunk_embedder.py  # Chunk embedding management
+│           ├── rag_store.py      # Complete RAG integration
+│           ├── embeddings/   # Embedding functionality
+│           │   ├── __init__.py
+│           │   ├── interfaces.py  # Abstract embedding interfaces
+│           │   └── models/        # Model implementations
+│           │       ├── __init__.py
+│           │       └── openai.py  # OpenAI embedding model
+│           └── vector_store/  # Vector storage functionality
+│               ├── __init__.py
+│               ├── interfaces.py  # VectorStore interface
+│               └── models/        # Concrete implementations
+│                   ├── __init__.py
+│                   └── faiss_store.py  # FAISS-based store
 ├── tests/
 │   ├── __init__.py
-│   └── test_model.py  # Unit tests for ModelInterface and ModelResponse
-├── CONTRIBUTING.md    # Development guidelines and practices
-├── requirements.txt   # Pinned dependencies
+│   ├── common/
+│   │   ├── __init__.py
+│   │   └── test_types.py   # Tests for shared types
+│   ├── model/
+│   │   ├── __init__.py
+│   │   └── test_interface.py # Tests for model interface
+│   └── retrieval/           # RAG system tests
+│       ├── __init__.py
+│       ├── test_types.py    # Tests for Document/DocumentChunk
+│       ├── test_document_store.py # Tests for DocumentStore
+│       ├── test_chunk_embedder.py # Tests for ChunkEmbedder
+│       ├── test_rag_store.py     # Tests for RAGStore
+│       ├── embeddings/
+│       │   ├── __init__.py
+│       │   ├── test_interfaces.py # Tests for embedding interfaces
+│       │   └── models/
+│       │       ├── __init__.py
+│       │       └── test_openai.py # Tests for OpenAI implementation
+│       └── vector_store/
+│           ├── __init__.py
+│           ├── test_interfaces.py # Tests for VectorStore interface
+│           └── test_faiss_store.py # Tests for FAISS store
+├── CONTRIBUTING.md         # Development guidelines
+├── requirements.txt       # Pinned dependencies
 └── README.md
 ```
 
@@ -29,96 +73,93 @@ ai_platform/
   * Feature branches: Component-specific development
 * See [CONTRIBUTING.md](CONTRIBUTING.md) for development workflow and guidelines
 
-### Implemented ComponentsDependencies
+### Implemented Components
 
 1. **Basic AI API Integration**
 
-   - **ModelResponse class**: Holds text and/or error messages, with a custom `__str__` for easy debugging.
-   - **ModelInterface class**: Uses the OpenAI `ChatCompletion.create` method, with environment-based or direct API key management.
-   - **Robust Error Handling**:
-     - Raises a `ValueError` if no API key is found.
-     - Validates API responses (checks for an empty or missing `choices` field).
-     - Catches and reports API errors.
-   - **Unit Tests**:
-     - Mocks OpenAI calls to avoid real API usage during testing.
-     - Covers missing API keys, malformed responses, and general error cases.
-2. **HTTP Request System (Legacy / Minimal)**
+   - **Common Types**:
+     - `ModelResponse` class for consistent response handling
+     - Supports both successful and error responses
+     - Custom string representation for debugging
+   - **Model Interface**:
+     - `ModelInterface` class for OpenAI API integration
+     - Environment-based or direct API key management
+     - Comprehensive error handling
+2. **Complete RAG System**
 
-   - Initially set up for testing with `httpbin.org`.
-   - Retained for reference but superseded by direct OpenAI integration in `ModelInterface`.
+   - **Document Types**:
+     - `Document` class for storing complete documents
+     - `DocumentChunk` class for managing document segments
+     - Support for metadata and unique identifiers
+   - **Document Store**:
+     - In-memory storage for documents and chunks
+     - Configurable chunking strategy
+     - Efficient document and chunk retrieval
+     - Support for custom chunk sizes
+   - **Embedding System**:
+     - Abstract `EmbeddingModel` interface
+     - Factory pattern for model creation
+     - OpenAI embedding model implementation
+     - Efficient embedding caching with `ChunkEmbedder`
+   - **Vector Store**:
+     - Abstract `VectorStore` interface
+     - FAISS-based implementation for efficient similarity search
+     - Support for dynamic updates and deletions
+   - **Integrated RAG Store**:
+     - Complete integration of all RAG components
+     - Clean interface for document management
+     - Efficient similarity search functionality
+     - Comprehensive error handling and cleanup
+     - Built-in caching through ChunkEmbedder
 
 ### Dependencies
 
-Your dependencies are pinned in `requirements.txt` for reproducibility, including:
+Dependencies are pinned in `requirements.txt` for reproducibility:
 
-- `openai` (for AI API calls)
-- `python-dotenv` (for managing `.env` environment variables)
-- `pytest`, `pytest-asyncio`, and/or `unittest` (for testing)
-- `httpx` or `urllib` (for any remaining HTTP requests, if needed)
+- `openai`: AI API integration
+- `python-dotenv`: Environment variable management
+- `pytest`: Primary testing framework
+- `pytest-asyncio`: Async test support
+- `httpx`: HTTP client for API calls
+- `faiss-cpu`: Vector similarity search
+- `numpy`: Array operations for FAISS
 
-## Roadmap
+## Testing
 
-1. Context Enhancement with RAG
+### Running All Tests
 
-   - Implement retrieval system
-   - Document storage and indexing
-   - Context integration with queries
-2. Input/Output Guardrails
+```bash
+# Using pytest (recommended)
+pytest
 
-   - Input validation and sanitization
-   - Output verification
-   - Safety checks and filters
-3. Model Router and Gateway
+# Using unittest
+python -m unittest discover
+```
 
-   - Multiple model support
-   - Request routing logic
-   - API gateway implementation
-4. Caching Mechanisms
+### Running Specific Tests
 
-   - Response caching
-   - Cache invalidation
-   - Performance optimization
-5. Complex Logic and Write Actions
+```bash
+# Run tests for specific components
+pytest tests/common/
+pytest tests/model/
+pytest tests/retrieval/
 
-   - Multi-step operations
-   - Write operation support
-   - Transaction management
-
-### Current Implementation Details
-
-#### ModelResponse Class
-
-- Manages both successful outputs and error states
-- Simple data structure with text and error fields
-- Custom `__str__` method for clear debugging output
-
-#### ModelInterface Class
-
-- Integrates with OpenAI’s `ChatCompletion` endpoint
-- Loads `OPENAI_API_KEY` from environment or constructor parameter
-- Validates response structure (catches missing/empty `choices`)
-- Handles errors robustly, returning a `ModelResponse` with error details
-
-#### Testing
-
-- **Comprehensive Unit Tests**:
-
-  - **ModelResponse**: Ensures text/error fields and `__str__` behavior are correct
-  - **ModelInterface**: Mocks OpenAI calls and tests success/error scenarios, including missing API keys and malformed responses
-- Run with:
-
-  ```bash
-  python -m unittest discover tests
-  ```
-
-  or your preferred testing framework (eg., `pytest`).
+# Run specific test files
+pytest tests/retrieval/test_types.py
+pytest tests/retrieval/test_document_store.py
+pytest tests/retrieval/test_chunk_embedder.py
+pytest tests/retrieval/test_rag_store.py
+pytest tests/retrieval/embeddings/test_interfaces.py
+pytest tests/retrieval/embeddings/models/test_openai.py
+pytest tests/retrieval/vector_store/test_faiss_store.py
+```
 
 ## Getting Started
 
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/renesultan/ai-platform.git
+git clone https://github.com/yourusername/ai-platform.git
 cd ai-platform
 ```
 
@@ -136,33 +177,103 @@ venv\Scripts\activate     # Windows
 pip install -r requirements.txt
 ```
 
-4. Run tests:
+4. Run tests to verify setup:
 
 ```bash
-python -m unittest tests/test_model.py
-```
-
--or-
-
-```python
 pytest
 ```
 
+## Usage Example
+
+Here's a basic example of using the RAG system:
+
+```python
+from ai_platform.retrieval import (
+    DocumentStore,
+    RAGStore,
+    EmbeddingModelFactory
+)
+from ai_platform.retrieval.vector_store.models.faiss_store import FAISSVectorStore
+
+# Initialize components
+document_store = DocumentStore(default_chunk_size=500)
+vector_store = FAISSVectorStore(dimension=1536)  # OpenAI's embedding dimension
+embedding_model = EmbeddingModelFactory.create(
+    model_type="openai",
+    api_key="your-api-key"
+)
+
+# Create RAG store
+rag_store = RAGStore(
+    document_store=document_store,
+    vector_store=vector_store,
+    embedding_model=embedding_model
+)
+
+# Add a document
+doc_id = rag_store.add_document(
+    content="Your document content here",
+    metadata={"source": "example"}
+)
+
+# Find relevant chunks
+results = rag_store.find_relevant_chunks(
+    query="Your search query",
+    k=3  # Number of results to return
+)
+
+# Process results
+for chunk, score in results:
+    print(f"Relevance score: {score}")
+    print(f"Content: {chunk.text}")
+```
+
+## Roadmap
+
+1. ✅ Basic OpenAI Integration
+
+   - Model interface
+   - Response handling
+   - Error management
+2. ✅ RAG System Implementation
+
+   - Document representation
+   - Chunking strategy
+   - Document store implementation
+   - Embedding system
+   - Vector store
+   - Complete RAG integration
+3. 🔄 Input/Output Guardrails
+
+   - Input validation
+   - Output verification
+   - Safety checks
+4. Model Router and Gateway
+
+   - Multiple model support
+   - Request routing
+   - API gateway
+5. Caching Mechanisms
+
+   - Response caching
+   - Cache invalidation
+   - Performance optimization
+
 ## Next Implementation Task
 
-While the initial OpenAI integration is functional, there are still improvements to be made:
+Current focus is on implementing input/output guardrails:
 
-1. **Explore Additional Error Handling**
-   * Catch specific OpenAI exceptions like `RateLimitError` or `AuthenticationError`
-   * Provide user-friendly or automated-retry logic
-2. **Experiment with Model Parameters**
-   * Adjust temperature, max_tokens, etc.
-   * Explore different models (e.g., GPT-4)
-3. **Continue Progression**
-   * Extend the platform with Retrieval Augmented Generation (RAG)
-   * Implement guardrails for safer inputs/outputs
-   * Build a model router/gateway for multiple AI providers
+1. Input Validation
+
+   - Content filtering
+   - Safety checks
+   - Rate limiting
+2. Output Verification
+
+   - Response validation
+   - Quality checks
+   - Safety filtering
 
 ## Development
 
-For guidelines on branch strategy, commit messages, and workflow, see [**CONTRIBUTING**.md](CONTRIBUTING.md).
+For guidelines on branch strategy, commit messages, and workflow, see [CONTRIBUTING.md](CONTRIBUTING.md).
